@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: creates IAM roles for Lambda, and Lambda function
+Parameters:
+  HelloWorldLambdaName:
+    Type: String
+    Description: prefix for the HelloWorld Lambda function
+  Greeting:
+    Type: String
+    Description: greeting phrase returned by the HelloWorld Lambda function
+    Default: hello world!!!
+  CodeBucketName:
+    Type: String
+    Description: name of bucket containing lambda code 
+    #NOTE - the code bucket is not created via the simple-lambda.yml template, you must create it beforehand 
+  CodeS3Key:
+    Type: String
+    Description: location of the lambda code zip file
+    #NOTE - the code zip file is not created via the simple-lambda.yml template, you upload it to this location beforehand
+Resources:
+  HelloWorldLambda:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Code: 
+        S3Bucket: !Ref CodeBucketName
+        S3Key: !Ref CodeS3Key
+      Description: returns a greeting 
+      Environment: 
+        Variables:
+          GREETING: !Ref Greeting
+      FunctionName: !Sub '${HelloWorldLambdaName}'
+      Handler: helloWorld.lambda_handler
+      Role: !GetAtt 
+        - HelloWorldLambdaExecutionRole
+        - Arn
+      Runtime: python3.6
+  HelloWorldLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      RoleName: !Sub '${HelloWorldLambdaName}-EX-${AWS::Region}'
+  LambdaWriteCloudwatchLogsPolicy:
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyName: LambdaWriteCloudwatchLogs
+      PolicyDocument: 
+        Version: 2012-10-17
+        Statement:
+          - Action: 
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource: 
+              - 'arn:aws:logs:*:*:*'
+      Roles: 
+        - !Ref HelloWorldLambdaExecutionRole
