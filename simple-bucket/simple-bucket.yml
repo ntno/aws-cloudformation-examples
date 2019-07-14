@@ -4,8 +4,8 @@ Parameters:
   CustomBucketName:
     Type: String
     Description: name for the bucket
-    AllowedPattern: ^[A-Za-z0-9][A-Za-z0-9\-]{1,61}[A-Za-z0-9]$
-    ConstraintDescription: name must be between 3 and 63 characters long and may contain alphanumerics and dashes
+    AllowedPattern: ^[a-z0-9][a-z0-9\-]{1,61}[a-z0-9]$
+    ConstraintDescription: name must be between 3 and 63 characters long and may contain lowercase alphanumerics and dashes
     #NOTE - this is a custom constraint for this template - see amazon docs for full notes on S3 bucket naming requirements
     #https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-s3-bucket-naming-requirements.html
 Resources:
